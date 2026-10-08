@@ -97,9 +97,9 @@ fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 .bar { height: 12px; border-radius: 6px; background: var(--tint); margin: 10px 0 0; overflow: hidden; }
 .bar span { display: block; height: 100%; background: var(--plum); border-radius: 6px; transition: width .6s ease; }
 .r.lead .bar span { background: linear-gradient(90deg, var(--plum), var(--rose)); }
-details { margin-top: 10px; }
-summary { cursor: pointer; font-size: .9rem; font-weight: 600; color: var(--plum); }
-.names { margin: 8px 0 0; font-size: .9rem; color: var(--muted); overflow-wrap: anywhere; }
+.chips { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.chips li { background: var(--tint); color: var(--plum-dark); font-size: .88rem; font-weight: 500; padding: 4px 11px; border-radius: 999px; overflow-wrap: anywhere; }
+.chips li.none { background: none; color: var(--muted); padding-left: 0; font-weight: 400; }
 .total { margin: 18px 0 0; color: var(--muted); font-size: .95rem; }
 footer { background: var(--ink); color: #b8b3cc; font-size: .85rem; }
 footer .wrap { padding-block: 18px; }
@@ -225,12 +225,13 @@ footer .wrap { padding-block: 18px; }
       var bar = document.createElement("div"); bar.className = "bar";
       var sp = document.createElement("span"); sp.style.width = (names.length / max * 100) + "%"; bar.appendChild(sp);
       r.appendChild(top); r.appendChild(bar);
+      var ul = document.createElement("ul"); ul.className = "chips";
       if (names.length) {
-        var d = document.createElement("details"), su = document.createElement("summary");
-        su.textContent = "Ver quién votó";
-        var p = document.createElement("p"); p.className = "names"; p.textContent = names.join(", ");
-        d.appendChild(su); d.appendChild(p); r.appendChild(d);
+        names.forEach(function (nm) { var li = document.createElement("li"); li.textContent = nm; ul.appendChild(li); });
+      } else {
+        var li0 = document.createElement("li"); li0.className = "none"; li0.textContent = "Sin votos todavía"; ul.appendChild(li0);
       }
+      r.appendChild(ul);
       box.appendChild(r);
     });
     document.getElementById("total").textContent = total
@@ -248,7 +249,7 @@ footer .wrap { padding-block: 18px; }
     });
   }
   load();
-  setInterval(function () { if (!document.hidden) load(); }, 8000);
+  setInterval(function () { if (!document.hidden) load(); }, 4000);
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();
