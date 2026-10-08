@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Votación del uniforme · Ginecología y Obstetricia · Hospital Distrital de Laredo</title>
+<meta name="description" content="Vota por el uniforme del Servicio de Ginecología y Obstetricia del Hospital Distrital de Laredo. Un voto por persona, resultados en vivo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: cabecera a la izquierda, tres pasos en secuencia (nombre, uniforme, confirmar), resultados en vivo al final */
+:root {
+  --paper: #f6f5f9;
+  --surface: #ffffff;
+  --ink: #1c1830;
+  --muted: #63607a;
+  --line: #dcd8e6;
+  --plum: #5c2a78;
+  --plum-dark: #431d5a;
+  --rose: #e0809f;
+  --tint: #ece8f4;
+  --ok: #167a45;
+  --bad: #b3261e;
+  --display: "Bricolage Grotesque", "Segoe UI", Arial, sans-serif;
+  --body: "Public Sans", "Segoe UI", Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 16px/1.55 var(--body); }
+img { max-width: 100%; display: block; }
+.wrap { width: min(1040px, 100% - 32px); margin-inline: auto; }
+
+/* Cabecera */
+.top { background: var(--plum-dark); color: #fff; }
+.top .wrap { display: flex; flex-wrap: wrap; gap: 6px 24px; padding-block: 12px; font-size: .9rem; align-items: center; justify-content: space-between; }
+.top b { font-weight: 600; }
+.top span { color: #d9cbe6; }
+.hero { padding-block: 44px 28px; }
+h1 { font: 800 clamp(2rem, 6vw, 3.4rem)/1.04 var(--display); letter-spacing: -.02em; margin: 0 0 14px; max-width: 16ch; text-wrap: balance; color: var(--plum-dark); }
+.hero p { margin: 0; max-width: 58ch; color: var(--muted); font-size: 1.05rem; }
+.rules { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 20px 0 0; padding: 0; list-style: none; font-size: .92rem; font-weight: 500; }
+.rules li::before { content: ""; display: inline-block; width: 8px; height: 8px; background: var(--rose); border-radius: 50%; margin-right: 8px; }
+
+/* Pasos */
+.step { padding-block: 28px; border-top: 1px solid var(--line); display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 0 18px; }
+.num { font: 800 1.1rem/1 var(--display); width: 40px; height: 40px; border-radius: 50%; background: var(--plum); color: #fff; display: grid; place-items: center; }
+h2 { font: 800 1.45rem/1.15 var(--display); margin: 6px 0 4px; letter-spacing: -.01em; }
+.hint { margin: 0 0 18px; color: var(--muted); font-size: .95rem; }
+.body { min-width: 0; }
+input[type="text"] { width: 100%; max-width: 440px; font: inherit; font-size: 1.05rem; padding: 14px 16px; border: 1.5px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); }
+input[type="text"]:hover { border-color: #b9b1cc; }
+:focus-visible { outline: 3px solid var(--rose); outline-offset: 2px; }
+
+/* Uniformes */
+fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; }
+.opt { position: relative; display: block; cursor: pointer; min-width: 0; }
+.opt input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.card { height: 100%; background: var(--surface); border: 2px solid var(--line); border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; transition: border-color .15s, box-shadow .15s; }
+.opt:hover .card { border-color: #b9b1cc; }
+.opt input:focus-visible + .card { outline: 3px solid var(--rose); outline-offset: 2px; }
+.opt input:checked + .card { border-color: var(--plum); box-shadow: 0 0 0 3px var(--plum); }
+.photo { background: var(--tint); aspect-ratio: 4 / 5; display: grid; place-items: center; padding: 10px; }
+.photo img { width: 100%; height: 100%; object-fit: contain; }
+.cap { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-top: 1px solid var(--line); }
+.cap strong { font: 800 1.2rem/1.1 var(--display); display: block; }
+.cap small { color: var(--muted); font-size: .88rem; }
+.chk { flex: none; width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; }
+.opt input:checked + .card .chk { background: var(--plum); border-color: var(--plum); }
+.opt input:checked + .card .chk::after { content: ""; width: 6px; height: 12px; border: solid #fff; border-width: 0 2.5px 2.5px 0; transform: translate(0, -1px) rotate(45deg); }
+
+/* Confirmar */
+.btn { font: 700 1rem var(--body); background: var(--plum); color: #fff; border: 0; border-radius: 6px; padding: 15px 30px; cursor: pointer; transition: background .15s; }
+.btn:hover:not(:disabled) { background: var(--plum-dark); }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+#msg { margin: 14px 0 0; font-weight: 600; min-height: 1.5em; }
+#msg.ok { color: var(--ok); } #msg.bad { color: var(--bad); }
+.done { display: none; margin-top: 14px; padding: 16px 18px; border-left: 5px solid var(--ok); background: var(--surface); border-radius: 0 6px 6px 0; }
+.done.show { display: block; }
+.done b { display: block; font: 800 1.1rem var(--display); }
+
+/* Resultados */
+.res { padding-block: 32px 64px; border-top: 1px solid var(--line); }
+.res-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; }
+.res-head h2 { margin: 0; }
+.live { color: var(--muted); font-size: .88rem; display: flex; align-items: center; gap: 8px; }
+.live i { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); animation: pulse 2s infinite; }
+@keyframes pulse { 50% { opacity: .3; } }
+.list { display: grid; gap: 14px; margin-top: 20px; }
+.r { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px 18px; }
+.r.lead { border-color: var(--plum); box-shadow: inset 5px 0 0 var(--plum); }
+.r-top { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 10px; }
+.r-top strong { font: 800 1.15rem var(--display); }
+.r-top .n { font: 800 2rem/1 var(--display); font-variant-numeric: tabular-nums; color: var(--plum-dark); }
+.r-top .n small { font: 500 .85rem var(--body); color: var(--muted); margin-left: 4px; }
+.bar { height: 12px; border-radius: 6px; background: var(--tint); margin: 10px 0 0; overflow: hidden; }
+.bar span { display: block; height: 100%; background: var(--plum); border-radius: 6px; transition: width .6s ease; }
+.r.lead .bar span { background: linear-gradient(90deg, var(--plum), var(--rose)); }
+details { margin-top: 10px; }
+summary { cursor: pointer; font-size: .9rem; font-weight: 600; color: var(--plum); }
+.names { margin: 8px 0 0; font-size: .9rem; color: var(--muted); overflow-wrap: anywhere; }
+.total { margin: 18px 0 0; color: var(--muted); font-size: .95rem; }
+footer { background: var(--ink); color: #b8b3cc; font-size: .85rem; }
+footer .wrap { padding-block: 18px; }
+
+@media (max-width: 560px) {
+  .step { grid-template-columns: 1fr; gap: 10px; }
+  .hero { padding-block: 30px 18px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="top"><div class="wrap">
+  <b>Hospital Distrital de Laredo</b>
+  <span>Servicio de Ginecología y Obstetricia</span>
+</div></div>
+
+<main>
+  <section class="hero wrap">
+    <h1>Elige el uniforme del servicio</h1>
+    <p>Quedaron tres finalistas. Pon tu nombre, marca tu favorito y confirma. El que sume más votos será el uniforme oficial.</p>
+    <ul class="rules">
+      <li>Un voto por persona</li>
+      <li>Puedes cambiar tu voto después</li>
+      <li>No necesitas correo ni cuenta</li>
+    </ul>
+  </section>
+
+  <form id="form" class="wrap" autocomplete="off" novalidate>
+    <section class="step">
+      <div class="num" aria-hidden="true">1</div>
+      <div class="body">
+        <h2><label for="nombre">Escribe tu nombre</label></h2>
+        <p class="hint">Nombre y apellido. Si votas otra vez con el mismo nombre, se reemplaza tu voto anterior.</p>
+        <input type="text" id="nombre" name="nombre" maxlength="60" placeholder="Ej. María Pérez" autocomplete="name" required>
+      </div>
+    </section>
+
+    <section class="step">
+      <div class="num" aria-hidden="true">2</div>
+      <div class="body">
+        <fieldset>
+          <legend><h2>Marca tu uniforme</h2></legend>
+          <p class="hint">Toca la foto del uniforme que prefieres.</p>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="op" value="10"><div class="card"><div class="photo"><img src="img/uniforme-10.jpg" alt="Uniforme 10: camiseta blanca con detalles azul marino y rosa, short azul marino" loading="lazy"></div><div class="cap"><div><strong>Uniforme 10</strong><small>Blanco, azul marino y rosa</small></div><span class="chk"></span></div></div></label>
+            <label class="opt"><input type="radio" name="op" value="1"><div class="card"><div class="photo"><img src="img/uniforme-1.jpg" alt="Uniforme 1: morado y lila con silueta de madre y bebé" loading="lazy"></div><div class="cap"><div><strong>Uniforme 1</strong><small>Morado y lila</small></div><span class="chk"></span></div></div></label>
+            <label class="opt"><input type="radio" name="op" value="6"><div class="card"><div class="photo"><img src="img/uniforme-6.jpg" alt="Uniforme 6: verde esmeralda y crema con cuello polo" loading="lazy"></div><div class="cap"><div><strong>Uniforme 6</strong><small>Esmeralda y crema</small></div><span class="chk"></span></div></div></label>
+          </div>
+        </fieldset>
+      </div>
+    </section>
+
+    <section class="step">
+      <div class="num" aria-hidden="true">3</div>
+      <div class="body">
+        <h2>Confirma tu voto</h2>
+        <p class="hint">Revisa que el nombre y el uniforme sean los correctos.</p>
+        <button class="btn" id="go" type="submit">Confirmar voto</button>
+        <p id="msg" role="status" aria-live="polite"></p>
+        <div class="done" id="done"><b id="doneTitle"></b><span id="doneText"></span></div>
+      </div>
+    </section>
+  </form>
+
+  <section class="res" id="resultados">
+    <div class="wrap">
+      <div class="res-head">
+        <h2>Resultados</h2>
+        <span class="live"><i></i><span id="upd">Cargando…</span></span>
+      </div>
+      <div class="list" id="list"></div>
+      <p class="total" id="total"></p>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap">Hospital Distrital de Laredo · Servicio de Ginecología y Obstetricia</div></footer>
+
+<script>
+(function () {
+  var URL_API = "https://fxuugixmaelscnetjjhj.supabase.co/rest/v1/rpc/";
+  var KEY = "sb_publishable_yqXtmyopzFg9jLdFXnGVFg_7DpZdFME";
+  var OPS = [
+    { k: "10", n: "Uniforme 10", d: "Blanco, azul marino y rosa" },
+    { k: "1", n: "Uniforme 1", d: "Morado y lila" },
+    { k: "6", n: "Uniforme 6", d: "Esmeralda y crema" }
+  ];
+  var form = document.getElementById("form"), nombre = document.getElementById("nombre");
+  var go = document.getElementById("go"), msg = document.getElementById("msg");
+  var done = document.getElementById("done");
+
+  try { var s = localStorage.getItem("uniformeNombre"); if (s) nombre.value = s; } catch (e) {}
+
+  function rpc(fn, body) {
+    return fetch(URL_API + fn, {
+      method: "POST",
+      headers: { "apikey": KEY, "Authorization": "Bearer " + KEY, "Content-Type": "application/json" },
+      body: JSON.stringify(body || {})
+    }).then(function (r) {
+      if (!r.ok) return r.json().catch(function () { return {}; }).then(function (j) { throw new Error(j.message || "Error " + r.status); });
+      return r.status === 204 ? null : r.text().then(function (t) { return t ? JSON.parse(t) : null; });
+    });
+  }
+  function say(t, c) { msg.textContent = t; msg.className = c || ""; }
+  function clean(v) { return v.replace(/\s+/g, " ").trim(); }
+
+  function draw(rows) {
+    var by = {}; OPS.forEach(function (o) { by[o.k] = []; });
+    rows.forEach(function (r) { if (by[r.opcion]) by[r.opcion].push(r.nombre); });
+    var list = OPS.slice().sort(function (a, b) { return by[b.k].length - by[a.k].length; });
+    var max = Math.max(1, by[list[0].k].length), total = rows.length;
+    var box = document.getElementById("list"); box.textContent = "";
+    list.forEach(function (o, i) {
+      var names = by[o.k].slice().sort(function (a, b) { return a.localeCompare(b, "es"); });
+      var r = document.createElement("article"); r.className = "r" + (i === 0 && names.length ? " lead" : "");
+      var top = document.createElement("div"); top.className = "r-top";
+      var st = document.createElement("strong"); st.textContent = o.n + " · " + o.d;
+      var n = document.createElement("div"); n.className = "n"; n.textContent = names.length;
+      var sm = document.createElement("small"); sm.textContent = names.length === 1 ? "voto" : "votos"; n.appendChild(sm);
+      top.appendChild(st); top.appendChild(n);
+      var bar = document.createElement("div"); bar.className = "bar";
+      var sp = document.createElement("span"); sp.style.width = (names.length / max * 100) + "%"; bar.appendChild(sp);
+      r.appendChild(top); r.appendChild(bar);
+      if (names.length) {
+        var d = document.createElement("details"), su = document.createElement("summary");
+        su.textContent = "Ver quién votó";
+        var p = document.createElement("p"); p.className = "names"; p.textContent = names.join(", ");
+        d.appendChild(su); d.appendChild(p); r.appendChild(d);
+      }
+      box.appendChild(r);
+    });
+    document.getElementById("total").textContent = total
+      ? "Total: " + total + (total === 1 ? " voto registrado." : " votos registrados.")
+      : "Todavía no hay votos. Sé la primera persona en votar.";
+  }
+
+  function load() {
+    rpc("resultados_uniformes").then(function (rows) {
+      draw(rows || []);
+      var t = new Date();
+      document.getElementById("upd").textContent = "En vivo · actualizado " + t.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    }).catch(function () {
+      document.getElementById("upd").textContent = "Sin conexión. Reintentando…";
+    });
+  }
+  load();
+  setInterval(function () { if (!document.hidden) load(); }, 8000);
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = clean(nombre.value), sel = form.querySelector('input[name="op"]:checked');
+    done.classList.remove("show");
+    if (name.length < 3) { say("Escribe tu nombre y apellido para votar.", "bad"); nombre.focus(); return; }
+    if (!sel) { say("Marca un uniforme antes de confirmar.", "bad"); return; }
+    go.disabled = true; say("Guardando tu voto…");
+    rpc("emitir_voto_uniforme", { p_nombre: name, p_opcion: sel.value }).then(function () {
+      try { localStorage.setItem("uniformeNombre", name); } catch (e) {}
+      say("");
+      document.getElementById("doneTitle").textContent = "Voto registrado";
+      document.getElementById("doneText").textContent = name + ", votaste por el Uniforme " + sel.value + ". Si cambias de opinión, vuelve a votar con el mismo nombre.";
+      done.classList.add("show");
+      load();
+      document.getElementById("resultados").scrollIntoView({ behavior: "smooth" });
+    }).catch(function () {
+      say("No se pudo guardar tu voto. Revisa tu conexión e inténtalo de nuevo.", "bad");
+    }).then(function () { go.disabled = false; });
+  });
+})();
+</script>
+</body>
+</html>
