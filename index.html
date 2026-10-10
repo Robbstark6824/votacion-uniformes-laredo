@@ -8,7 +8,7 @@
 <meta property="og:type" content="website">
 <meta property="og:locale" content="es_PE">
 <meta property="og:title" content="Pedido de polos · Ginecología y Obstetricia">
-<meta property="og:description" content="Hospital Distrital de Laredo. Registra el nombre para tu polo y tu talla.">
+<meta property="og:description" content="Hospital Distrital de Laredo. Registra el nombre, el número y la talla de tu polo.">
 <meta property="og:url" content="https://robbstark6824.github.io/votacion-uniformes-laredo/">
 <meta property="og:image" content="https://robbstark6824.github.io/votacion-uniformes-laredo/img/vista-previa.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -61,6 +61,9 @@ h2 { font: 800 1.45rem/1.15 var(--display); margin: 6px 0 4px; letter-spacing: -
 input[type="text"] { width: 100%; max-width: 440px; font: inherit; font-size: 1.05rem; padding: 14px 16px; border: 1.5px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); }
 input[type="text"]:hover { border-color: #b9b1cc; }
 #polo { text-transform: uppercase; }
+#numero { max-width: 140px; }
+td.dup { color: var(--bad); }
+.dupnote { color: var(--bad); font-size: .9rem; margin: 10px 0 0; }
 :focus-visible { outline: 3px solid var(--rose); outline-offset: 2px; }
 .count { color: var(--muted); font-size: .85rem; margin: 6px 0 0; }
 
@@ -123,7 +126,7 @@ footer .wrap { padding-block: 18px; }
   <section class="hero wrap">
     <div>
       <h1>Ganó el Uniforme 1. Pide tu polo.</h1>
-      <p>Escribe tu nombre, el nombre que quieres que lleve el polo y tu talla. Si te equivocas, vuelve a enviar con tu mismo nombre y se reemplaza tu pedido anterior.</p>
+      <p>Escribe tu nombre, el nombre y el número que quieres en el polo, y tu talla. Si te equivocas, vuelve a enviar con tu mismo nombre y se reemplaza tu pedido anterior.</p>
     </div>
     <figure class="win" style="margin:0">
       <div class="photo"><img src="img/uniforme-1.jpg" alt="Uniforme 1, ganador: morado y lila con silueta de madre y bebé"></div>
@@ -154,6 +157,15 @@ footer .wrap { padding-block: 18px; }
     <section class="step">
       <div class="num" aria-hidden="true">3</div>
       <div class="body">
+        <h2><label for="numero">Número del polo</label></h2>
+        <p class="hint">Del 0 al 99.</p>
+        <input type="text" id="numero" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="Ej. 7" autocomplete="off" required>
+      </div>
+    </section>
+
+    <section class="step">
+      <div class="num" aria-hidden="true">4</div>
+      <div class="body">
         <fieldset>
           <legend><h2>Tu talla</h2></legend>
           <p class="hint">Elige una.</p>
@@ -177,11 +189,12 @@ footer .wrap { padding-block: 18px; }
       <ul class="resumen" id="resumen" aria-label="Cantidad por talla"></ul>
       <div class="tabla-wrap">
         <table>
-          <thead><tr><th scope="col">N.º</th><th scope="col">Nombre</th><th scope="col">Nombre en el polo</th><th scope="col">Talla</th></tr></thead>
-          <tbody id="filas"><tr><td colspan="4" class="vacio">Cargando…</td></tr></tbody>
+          <thead><tr><th scope="col">N.º</th><th scope="col">Nombre</th><th scope="col">Nombre en el polo</th><th scope="col">N.º polo</th><th scope="col">Talla</th></tr></thead>
+          <tbody id="filas"><tr><td colspan="5" class="vacio">Cargando…</td></tr></tbody>
         </table>
       </div>
       <p class="total" id="total"></p>
+      <p class="dupnote" id="dupnote" role="status"></p>
       <p class="links"><a href="votacion.html">Ver la votación anterior</a></p>
     </div>
   </section>
@@ -197,7 +210,7 @@ footer .wrap { padding-block: 18px; }
   var KEY = "sb_publishable_yqXtmyopzFg9jLdFXnGVFg_7DpZdFME";
   var TALLAS = ["XS", "S", "M", "L", "XL", "XXL"];
   var form = document.getElementById("form"), nombre = document.getElementById("nombre");
-  var polo = document.getElementById("polo"), go = document.getElementById("go");
+  var polo = document.getElementById("polo"), numero = document.getElementById("numero"), go = document.getElementById("go");
   var msg = document.getElementById("msg"), done = document.getElementById("done");
   var btnPdf = document.getElementById("pdf");
   var rows = [];
@@ -212,6 +225,7 @@ footer .wrap { padding-block: 18px; }
 
   try { var s0 = localStorage.getItem("polosNombre"); if (s0) nombre.value = s0; } catch (e) {}
 
+  numero.addEventListener("input", function () { numero.value = numero.value.replace(/\D/g, "").slice(0, 2); });
   polo.addEventListener("input", function () {
     document.getElementById("cuenta").textContent = polo.value.length + " / 20";
   });
@@ -235,12 +249,17 @@ footer .wrap { padding-block: 18px; }
     var body = document.getElementById("filas"); body.textContent = "";
     if (!rows.length) {
       var tr0 = document.createElement("tr"), td0 = document.createElement("td");
-      td0.colSpan = 4; td0.className = "vacio"; td0.textContent = "Todavía no hay pedidos.";
+      td0.colSpan = 5; td0.className = "vacio"; td0.textContent = "Todavía no hay pedidos.";
       tr0.appendChild(td0); body.appendChild(tr0);
     }
+    var veces = {};
+    rows.forEach(function (r) { veces[r.numero] = (veces[r.numero] || 0) + 1; });
+    var repetidos = Object.keys(veces).filter(function (k) { return veces[k] > 1; });
     rows.forEach(function (r, i) {
       var tr = document.createElement("tr");
-      cell(tr, String(i + 1)); cell(tr, r.nombre); cell(tr, r.nombre_polo, "polo"); cell(tr, r.talla, "t");
+      cell(tr, String(i + 1)); cell(tr, r.nombre); cell(tr, r.nombre_polo, "polo");
+      cell(tr, r.numero == null ? "—" : (veces[r.numero] > 1 ? r.numero + " (repetido)" : String(r.numero)), "t" + (veces[r.numero] > 1 ? " dup" : ""));
+      cell(tr, r.talla, "t");
       body.appendChild(tr);
     });
     var res = document.getElementById("resumen"); res.textContent = "";
@@ -254,6 +273,9 @@ footer .wrap { padding-block: 18px; }
     document.getElementById("total").textContent = rows.length
       ? "Total: " + rows.length + (rows.length === 1 ? " pedido." : " pedidos.")
       : "";
+    document.getElementById("dupnote").textContent = repetidos.length
+      ? "Número repetido: " + repetidos.join(", ") + ". Conviene que cada persona elija uno distinto."
+      : "";
     btnPdf.disabled = !rows.length;
   }
 
@@ -262,7 +284,7 @@ footer .wrap { padding-block: 18px; }
       .catch(function () {
         document.getElementById("filas").innerHTML = "";
         var tr = document.createElement("tr"), td = document.createElement("td");
-        td.colSpan = 4; td.className = "vacio"; td.textContent = "Sin conexión. Reintentando…";
+        td.colSpan = 5; td.className = "vacio"; td.textContent = "Sin conexión. Reintentando…";
         tr.appendChild(td); document.getElementById("filas").appendChild(tr);
       });
   }
@@ -271,18 +293,19 @@ footer .wrap { padding-block: 18px; }
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();
-    var name = clean(nombre.value), pl = clean(polo.value).toUpperCase();
+    var name = clean(nombre.value), pl = clean(polo.value).toUpperCase(), num = numero.value.trim();
     var sel = form.querySelector('input[name="talla"]:checked');
     done.classList.remove("show");
     if (name.length < 3) { say("Escribe tu nombre y apellido.", "bad"); nombre.focus(); return; }
     if (pl.length < 2) { say("Escribe el nombre que irá en el polo.", "bad"); polo.focus(); return; }
+    if (!/^\d{1,2}$/.test(num)) { say("Escribe un número del 0 al 99.", "bad"); numero.focus(); return; }
     if (!sel) { say("Elige tu talla.", "bad"); return; }
     go.disabled = true; say("Guardando tu pedido…");
-    rpc("emitir_pedido_polo", { p_nombre: name, p_nombre_polo: pl, p_talla: sel.value }).then(function () {
+    rpc("emitir_pedido_polo", { p_nombre: name, p_nombre_polo: pl, p_talla: sel.value, p_numero: parseInt(num, 10) }).then(function () {
       try { localStorage.setItem("polosNombre", name); } catch (e) {}
       say("");
       document.getElementById("doneTitle").textContent = "Pedido registrado";
-      document.getElementById("doneText").textContent = name + ", tu polo dirá «" + pl + "» en talla " + sel.value + ". Si algo está mal, vuelve a enviar con tu mismo nombre.";
+      document.getElementById("doneText").textContent = name + ", tu polo dirá «" + pl + "», número " + num + ", talla " + sel.value + ". Si algo está mal, vuelve a enviar con tu mismo nombre.";
       done.classList.add("show");
       return load();
     }).catch(function () {
@@ -301,11 +324,11 @@ footer .wrap { padding-block: 18px; }
     doc.text("Fecha: " + fecha + "   ·   Total: " + rows.length + (rows.length === 1 ? " polo" : " polos"), 14, 31);
     doc.autoTable({
       startY: 37,
-      head: [["N.º", "Nombre", "Nombre en el polo", "Talla"]],
-      body: rows.map(function (r, i) { return [i + 1, r.nombre, r.nombre_polo, r.talla]; }),
+      head: [["N.º", "Nombre", "Nombre en el polo", "N.º polo", "Talla"]],
+      body: rows.map(function (r, i) { return [i + 1, r.nombre, r.nombre_polo, r.numero == null ? "-" : r.numero, r.talla]; }),
       headStyles: { fillColor: [67, 29, 90] },
       styles: { fontSize: 10, cellPadding: 2.5 },
-      columnStyles: { 0: { cellWidth: 14 }, 3: { cellWidth: 20, halign: "center" } }
+      columnStyles: { 0: { cellWidth: 14 }, 3: { cellWidth: 22, halign: "center" }, 4: { cellWidth: 20, halign: "center" } }
     });
     var porTalla = TALLAS.map(function (t) {
       return [t, rows.filter(function (r) { return r.talla === t; }).length];
